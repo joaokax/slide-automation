@@ -50,12 +50,10 @@ if task_list.work_items is not None:
         task_ids.append(task.id)
 pprint.pprint(f"lista de tasks {task_ids}")
 
-# USER PROJECT LIST
-# core_client = connection.clients.get_core_client()
-# get_projects_response = core_client.get_projects()
-# index = 0
-# while get_projects_response is not None:
-#     for project in get_projects_response:
-#         pprint.pprint("[" + str(index) + "] " + project.name)
-#         index += 1
-#     break
+# GET TASK DETAILS
+for task_id in task_ids:
+    task = work_item_tracking_client.get_work_item(id=task_id)
+    pprint.pprint(
+        f"ID: {task.id}, Type: {task.fields['System.WorkItemType']}, Title: {task.fields['System.Title']}")
+
+
