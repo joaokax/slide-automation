@@ -29,6 +29,12 @@ if work_item_list.work_items is not None:
     # break
 pprint.pprint(work_item_ids)
 
+# GET WORK ITEM DETAILS
+for work_item_id in work_item_ids:
+    work_item = work_item_tracking_client.get_work_item(id=work_item_id)
+    pprint.pprint(
+        f"ID: {work_item.id}, Type: {work_item.fields['System.WorkItemType']}, Title: {work_item.fields['System.Title']}")
+
 # USER PROJECT LIST
 # core_client = connection.clients.get_core_client()
 # get_projects_response = core_client.get_projects()
