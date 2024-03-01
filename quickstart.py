@@ -9,7 +9,7 @@ from googleapiclient.errors import HttpError
 
 load_dotenv()
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/presentations.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/presentations.readonly", "https://www.googleapis.com/auth/presentations", "https://www.googleapis.com/auth/drive.file"]
 
 # The ID of a sample presentation.
 PRESENTATION_ID = os.getenv("PRESENTATION_ID")
