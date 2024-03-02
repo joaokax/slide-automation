@@ -40,97 +40,26 @@ def main():
 
     try:
         slide_service = build("slides", "v1", credentials=creds)
-        # presentation = (
-        #     slide_service.presentations().get(presentationId=TEMPLATE_ID).execute()
-        # )
-        # slides = presentation.get("slides")
-        # print(f"The presentation contains {len(slides)} slides:")
-
         drive_service = build("drive", "v3", credentials=creds)
-        # Call the Drive v3 API
-        # results = (
-        #     drive_service.files()
-        #     .list(pageSize=10, fields="nextPageToken, files(id, name)")
-        #     .execute()
-        # )
-        # items = results.get("files", [])
-        # if not items:
-        #     print("No files found.")
-        #     return
-        # print("Files:")
-        # for item in items:
-        #     print(f"{item['name']} ({item['id']})")
 
-        presentation_result = drive_service.files().list(q=f"name='{TEMPLATE_NAME}'").execute().get('files')[0]
-        presentation_id = presentation_result['id']
-        print(f"ID TEMPLATE ---- {presentation_result['id']}")
+        # presentation_result = drive_service.files().list(q=f"name='{TEMPLATE_NAME}'").execute().get('files')[0]
+        # presentation_id = presentation_result['id']
+        # print(f"ID TEMPLATE ---- {presentation_result['id']}")
 
-        presentation = slide_service.presentations().get(presentationId=presentation_id).execute()
+        presentation = slide_service.presentations().get(presentationId=TEMPLATE_ID).execute()
 
         # Criar uma cópia da apresentação
-        copy_title = 'Cópia da Apresentação Mercado - 5'
-        copy_body = {'title': copy_title}
-        copy_request = slide_service.presentations().create(body=copy_body).execute()
-        file_id = copy_request.get('presentationId')
-        drive_service.files().update(fileId=file_id, addParents=DRIVE_FOLDER_ID).execute()
+        copy_title = 'Cópia da Apresentação Mercado - 6'
+        copy_body = {'name': copy_title}
+        copied_presentation = (
+            drive_service.files().copy(fileId=TEMPLATE_ID, body=copy_body).execute()
+        )
 
-        print(f'A apresentação foi movida para a pasta com o ID: {DRIVE_FOLDER_ID}')
+        presentation_copy_id = copied_presentation.get("id")
+        print(f'A apresentação foi copiada, ID: {presentation_copy_id}')
 
-        # request = {
-        #     'presentationId': TEMPLATE_ID
-        # }
-        # response = slide_service.presentations().copy(body=request).execute()
-        # new_presentation_id = response['presentationId']
-        #
-        # request = {
-        #     'title': NEW_PRESENTATION_NAME
-        # }
-        # slide_service.presentations().update(presentationId=new_presentation_id, body=request).execute()
-        #
-        # # Mover Apresentação para pasta
-        # request = {
-        #     'addParents': [{'id': DRIVE_FOLDER_ID}]
-        # }
-        # service.files().update(fileId=new_presentation_id, body=request).execute()
-
-        # replace_text(service, new_presentation_id, '{{sprint}}', str(sprint_value))
-
-        # formatted_slides = json.dumps(slides, indent=4)
-        # print(formatted_slides)
-        # for i, slide in enumerate(slides):
-        #     print(
-        #         f"- Slide #{i + 1} contains"
-        #         f" {len(slide.get('pageElements'))} elements."
-        #     )
     except HttpError as err:
         print(err)
-
-
-# def clone_presentation(template_id, new_presentation_name, drive_folder_id, sprint_value):
-#     service = build("drive", "v3", credentials=)
-
-
-# def copy_presentation(creds):
-#     try:
-#         drive_service = build("drive", "v3", credentials=creds)
-#         rsp = drive_service.files().list(q=f"name={TEMPLATE_NAME}").execute().get('files')[0]
-#         body = {"name": NEW_PRESENTATION_NAME}
-#         presentation_copy = drive_service.files().copy(body=body, fileId=rsp['id']).execute().get('id')
-#
-#         # return presentation_copy
-#
-#         # drive_response = (
-#         #     drive_service.files().copy(fileId=TEMPLATE_ID, body=body).execute()
-#         # )
-#         # presentation_copy_id = drive_response.get("id")
-#
-#     except HttpError as error:
-#         print(f"An error occurred: {error}")
-#         print("Presentations  not copied")
-#         return error
-#
-#     return presentation_copy
-#     # return presentation_copy_id
 
 
 if __name__ == "__main__":
