@@ -239,6 +239,82 @@ azure_object = {
                 }
             ]
         }
+    ],
+    "next_sprint": [
+        {
+            "id": 18062,
+            "type": "Product Backlog Item",
+            "state": "Desenvolvendo",
+            "title": "Tarefa 1",
+            "tasks": [
+                {
+                    "task_id": 24961,
+                    "task_type": "Task",
+                    "task_state": "In Progress",
+                    "task_title": "Actions AWS"
+                },
+                {
+                    "task_id": 24962,
+                    "task_type": "Task",
+                    "task_state": "Done",
+                    "task_title": "Script de teste de conex\u00e3o"
+                }
+            ]
+        },
+        {
+            "id": 23521,
+            "type": "Product Backlog Item",
+            "state": "Done",
+            "title": "Tarefa 2",
+            "tasks": [
+                {
+                    "task_id": 24926,
+                    "task_type": "Task",
+                    "task_state": "Done",
+                    "task_title": "Deploy - Produ\u00e7\u00e3o "
+                }
+            ]
+        },
+        {
+            "id": 24190,
+            "type": "Product Backlog Item",
+            "state": "Done",
+            "title": "Tarefa 3",
+            "tasks": [
+                {
+                    "task_id": 24907,
+                    "task_type": "Task",
+                    "task_state": "Done",
+                    "task_title": "Homologa\u00e7\u00e3o"
+                },
+                {
+                    "task_id": 25012,
+                    "task_type": "Task",
+                    "task_state": "Done",
+                    "task_title": "Deploy em produ\u00e7\u00e3o"
+                },
+                {
+                    "task_id": 25013,
+                    "task_type": "Task",
+                    "task_state": "Done",
+                    "task_title": "Merge e altera\u00e7\u00f5es necess\u00e1rias"
+                }
+            ]
+        },
+        {
+            "id": 24231,
+            "type": "Product Backlog Item",
+            "state": "Done",
+            "title": "Tarefa 4",
+            "tasks": [
+                {
+                    "task_id": 24680,
+                    "task_type": "Task",
+                    "task_state": "Done",
+                    "task_title": "Tela Informa\u00e7\u00f5es Profissionais refinada"
+                }
+            ]
+        }
     ]
 }
 
@@ -347,6 +423,8 @@ def main():
                 slide_service.presentations().batchUpdate(presentationId=copied_presentation_id, body=body).execute()
 
         print(f"{len(number_of_slides)} slides copiados com sucesso.")
+
+        # TODO Preencher os slides com as informações do objeto azure_object
 
 
 
