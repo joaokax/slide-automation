@@ -40,31 +40,41 @@ def main():
 
     try:
         slide_service = build("slides", "v1", credentials=creds)
-        presentation = (
-            slide_service.presentations().get(presentationId=TEMPLATE_ID).execute()
-        )
-        slides = presentation.get("slides")
-        print(f"The presentation contains {len(slides)} slides:")
-
-        # copy_presentation(creds)
+        # presentation = (
+        #     slide_service.presentations().get(presentationId=TEMPLATE_ID).execute()
+        # )
+        # slides = presentation.get("slides")
+        # print(f"The presentation contains {len(slides)} slides:")
 
         drive_service = build("drive", "v3", credentials=creds)
         # Call the Drive v3 API
-        results = (
-            drive_service.files()
-            .list(pageSize=10, fields="nextPageToken, files(id, name)")
-            .execute()
-        )
-        items = results.get("files", [])
-        if not items:
-            print("No files found.")
-            return
-        print("Files:")
-        for item in items:
-            print(f"{item['name']} ({item['id']})")
+        # results = (
+        #     drive_service.files()
+        #     .list(pageSize=10, fields="nextPageToken, files(id, name)")
+        #     .execute()
+        # )
+        # items = results.get("files", [])
+        # if not items:
+        #     print("No files found.")
+        #     return
+        # print("Files:")
+        # for item in items:
+        #     print(f"{item['name']} ({item['id']})")
 
-        rsp = drive_service.files().list(q=f"name='{TEMPLATE_NAME}'").execute().get('files')[0]
-        print(f"QUERY ---- {rsp}")
+        presentation_result = drive_service.files().list(q=f"name='{TEMPLATE_NAME}'").execute().get('files')[0]
+        presentation_id = presentation_result['id']
+        print(f"ID TEMPLATE ---- {presentation_result['id']}")
+
+        presentation = slide_service.presentations().get(presentationId=presentation_id).execute()
+
+        # Criar uma cópia da apresentação
+        copy_title = 'Cópia da Apresentação Mercado - 5'
+        copy_body = {'title': copy_title}
+        copy_request = slide_service.presentations().create(body=copy_body).execute()
+        file_id = copy_request.get('presentationId')
+        drive_service.files().update(fileId=file_id, addParents=DRIVE_FOLDER_ID).execute()
+
+        print(f'A apresentação foi movida para a pasta com o ID: {DRIVE_FOLDER_ID}')
 
         # request = {
         #     'presentationId': TEMPLATE_ID
