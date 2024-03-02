@@ -42,21 +42,41 @@ def main():
         slide_service = build("slides", "v1", credentials=creds)
         drive_service = build("drive", "v3", credentials=creds)
 
-        # presentation_result = drive_service.files().list(q=f"name='{TEMPLATE_NAME}'").execute().get('files')[0]
-        # presentation_id = presentation_result['id']
-        # print(f"ID TEMPLATE ---- {presentation_result['id']}")
+        # # Criar uma cópia da apresentação
+        # copy_title = 'Cópia da Apresentação Mercado - 6'
+        # copy_body = {'name': copy_title}
+        # copied_presentation = (
+        #     drive_service.files().copy(fileId=TEMPLATE_ID, body=copy_body).execute()
+        # )
+        # presentation_copy_id = copied_presentation.get("id")
+        # print(f'A apresentação foi copiada, ID: {presentation_copy_id}')
 
-        presentation = slide_service.presentations().get(presentationId=TEMPLATE_ID).execute()
+        # TODO SUBSTITUIR AS CHAVES DESSA CÓPIA. EX: {{SPRINT}} PARA NÚMERO DA SPRINT
 
-        # Criar uma cópia da apresentação
-        copy_title = 'Cópia da Apresentação Mercado - 6'
-        copy_body = {'name': copy_title}
-        copied_presentation = (
-            drive_service.files().copy(fileId=TEMPLATE_ID, body=copy_body).execute()
-        )
+        texts_to_replace = ["{{sprint}}", "{{type_1}}", "{{id_1}}"]
+        replacement_texts = ["Sprint 44", "PB1", "123456"]
+        presentation_copy_id = "1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0"
 
-        presentation_copy_id = copied_presentation.get("id")
-        print(f'A apresentação foi copiada, ID: {presentation_copy_id}')
+        for text, replacement in zip(texts_to_replace, replacement_texts):
+            body = {
+                "requests": [
+                    {
+                        "replaceAllText": {
+                            "containsText": {"text": text},
+                            "replaceText": replacement,
+                        }
+                    }
+                ]
+            }
+            slide_service.presentations().batchUpdate(
+                presentationId=presentation_copy_id, body=body
+            ).execute()
+
+        print("Os textos foram substituidos com sucesso!")
+
+
+
+
 
     except HttpError as err:
         print(err)
