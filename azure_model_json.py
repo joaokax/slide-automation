@@ -20,7 +20,7 @@ azure_object_type = {
 
 }
 
-azure_object_mock = {
+azure_object = {
     "project": "My Project",
     "sprint": "44",
     "work_items": [
@@ -311,7 +311,7 @@ google_slides_object = [
                                 "rgbColor": {}
                             },
                             "alpha": 1,
-                            "rotateWithShape": false,
+                            "rotateWithShape": "false",
                             "propertyState": "NOT_RENDERED"
                         },
                         "contentAlignment": "MIDDLE"
