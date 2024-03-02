@@ -52,7 +52,6 @@ def main():
         # print(f'A apresentação foi copiada, ID: {presentation_copy_id}')
 
         # TODO SUBSTITUIR AS CHAVES DESSA CÓPIA. EX: {{SPRINT}} PARA NÚMERO DA SPRINT
-
         # texts_to_replace = ["{{sprint}}", "{{type_1}}", "{{id_1}}"]
         # replacement_texts = ["Sprint 44", "PB1", "123456"]
         # presentation_copy_id = "1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0"
@@ -74,24 +73,21 @@ def main():
         #
         # print("Os textos foram substituidos com sucesso!")
 
-        # TODO CLONAR UM SLIDE DA APRESENTAÇÃO CLONE
+        # TODO CLONAR SLIDES DA APRESENTAÇÃO CLONE
         copied_presentation_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
         copied_presentation = slide_service.presentations().get(presentationId=copied_presentation_id).execute()
-        slide_index = 2
-        body = {
-            "requests": [
-                {
-                    'duplicateObject': {
-                        'objectId': copied_presentation.get('slides')[slide_index]['objectId'],
-                    }
+        slide_indices = [2, 4]
+        requests = []
+        for index in slide_indices:
+            requests.append({
+                'duplicateObject': {
+                    'objectId': copied_presentation.get('slides')[index]['objectId'],
                 }
-            ]
-        }
+            })
+
+        body = {'requests': requests}
         slide_service.presentations().batchUpdate(presentationId=copied_presentation_id, body=body).execute()
-        print("O slide 3 foi copiado com sucesso.")
-
-
-
+        print("Slide 3 e 5 foram copiados com sucesso.")
 
 
 
