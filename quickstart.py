@@ -326,7 +326,7 @@ load_dotenv()
 SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/presentations',
           'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file']
 
-TEMPLATE_ID = os.getenv("TEMPLATE_ID")
+SLIDE_TEMPLATE_ID = os.getenv("SLIDE_TEMPLATE_ID")
 TEMPLATE_NAME = "Mercado Topográfico Review Template"
 # DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
 
@@ -403,7 +403,7 @@ def create_copy_of_presentation(drive_service):
     body = {
         "name": f"Mercado Topográfico - Sprint {azure_object['sprint']}"
     }
-    response = drive_service.files().copy(fileId=TEMPLATE_ID, body=body).execute()
+    response = drive_service.files().copy(fileId=SLIDE_TEMPLATE_ID, body=body).execute()
     new_presentation_id = response.get("id")
     print(f'A apresentação foi copiada, ID: {new_presentation_id}')
     return new_presentation_id

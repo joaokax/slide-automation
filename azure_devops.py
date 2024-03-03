@@ -47,14 +47,14 @@ def get_azure_work_items():
     # FUNCIONANDO
     core_client = connection.clients.get_core_client()
 
-    project_name = "Mercado Topográfico"
+    project_name = os.getenv("PROJECT_NAME")
     project_id = None
     get_projects_response = core_client.get_projects()
     for project in get_projects_response:
         if project.name == project_name:
             project_id = project.id
 
-    team_name = "Mercado Topográfico Team"
+    team_name = os.getenv("TEAM_NAME")
     team_id = None
     get_teams_response = core_client.get_teams(project_id=project_id)
     for team in get_teams_response:
