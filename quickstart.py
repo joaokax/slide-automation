@@ -328,9 +328,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://ww
 
 TEMPLATE_ID = os.getenv("TEMPLATE_ID")
 TEMPLATE_NAME = "Mercado Topográfico Review Template"
-NEW_PRESENTATION_NAME = 'Mercado Topográfico Review 2'
-DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
-SPRINT_VALUE = 43
+# DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
 
 
 def main():
@@ -349,58 +347,12 @@ def main():
             token.write(creds.to_json())
 
     try:
+        print("Autenticado. Começando o processo...")
+
         slide_service = build("slides", "v1", credentials=creds)
         drive_service = build("drive", "v3", credentials=creds)
 
-        # # Criar uma cópia da apresentação
-        # copy_title = 'Cópia da Apresentação Mercado - 6'
-        # copy_body = {'name': copy_title}
-        # copied_presentation = (
-        #     drive_service.files().copy(fileId=TEMPLATE_ID, body=copy_body).execute()
-        # )
-        # presentation_copy_id = copied_presentation.get("id")
-        # print(f'A apresentação foi copiada, ID: {presentation_copy_id}')
-
-        # TODO SUBSTITUIR AS CHAVES DESSA CÓPIA. EX: {{SPRINT}} PARA NÚMERO DA SPRINT
-        # texts_to_replace = ["{{sprint}}", "{{type_1}}", "{{id_1}}"]
-        # replacement_texts = ["Sprint 44", "PB1", "123456"]
-        # presentation_copy_id = "1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0"
-        #
-        # for text, replacement in zip(texts_to_replace, replacement_texts):
-        #     body = {
-        #         "requests": [
-        #             {
-        #                 "replaceAllText": {
-        #                     "containsText": {"text": text},
-        #                     "replaceText": replacement,
-        #                 }
-        #             }
-        #         ]
-        #     }
-        #     slide_service.presentations().batchUpdate(
-        #         presentationId=presentation_copy_id, body=body
-        #     ).execute()
-        #
-        # print("Os textos foram substituidos com sucesso!")
-
-        # TODO CLONAR SLIDES DA APRESENTAÇÃO CLONE
-        # presentation_copy_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
-        # copied_presentation = slide_service.presentations().get(presentationId=presentation_copy_id).execute()
-        # slide_indices = [2, 4]
-        # requests = []
-        # for index in slide_indices:
-        #     requests.append({
-        #         'duplicateObject': {
-        #             'objectId': presentation_copy.get('slides')[index]['objectId'],
-        #         }
-        #     })
-        #
-        # body = {'requests': requests}
-        # slide_service.presentations().batchUpdate(presentationId=presentation_copy_id, body=body).execute()
-        # print("Slide 3 e 5 foram copiados com sucesso.")
-
-        # TODO CRIAR A QUANTIDADE DE SLIDES EXATA PARA COMPORTAR O NÚMERO DE WORK ITEMS
-        presentation_copy_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
+        presentation_copy_id = create_copy_of_presentation(drive_service)
         presentation_copy = slide_service.presentations().get(presentationId=presentation_copy_id).execute()
 
         next_sprint_number = int(azure_object["sprint"]) + 1
@@ -410,12 +362,11 @@ def main():
         # Posição dos slides que serão clonados
         item_slide_original_index = 2
         item_slide_original_id = presentation_copy.get('slides')[item_slide_original_index]['objectId']
-
         next_sprint_item_slide = 4
         next_sprint_item_slide_id = presentation_copy.get('slides')[next_sprint_item_slide]['objectId']
 
         items_per_slide = 3
-        number_of_slides = []
+        number_of_slides_created = []
 
         item_slide_copy_id = ""
 
@@ -428,7 +379,7 @@ def main():
             for index in range(total_list_items):
                 # Cria um novo slide a cada 3 work items
                 if index % items_per_slide == 0:
-                    number_of_slides.append(index)
+                    number_of_slides_created.append(index)
                     item_slide_copy_id = create_copy_of_item_slide_original(
                         slide_service, presentation_copy_id, initial_slide_id
                     )
@@ -441,10 +392,21 @@ def main():
         delete_slide(slide_service, presentation_copy_id, item_slide_original_id)
         delete_slide(slide_service, presentation_copy_id, next_sprint_item_slide_id)
         clear_unused_variables_globally(slide_service, presentation_copy_id, items_per_slide)
-        print(f"{len(number_of_slides)} slides criados com sucesso.")
+        print(f"{len(number_of_slides_created)} slides criados com sucesso.")
+        print("Apresentação finalizada!")
 
     except HttpError as err:
         print(err)
+
+
+def create_copy_of_presentation(drive_service):
+    body = {
+        "name": f"Mercado Topográfico - Sprint {azure_object['sprint']}"
+    }
+    response = drive_service.files().copy(fileId=TEMPLATE_ID, body=body).execute()
+    new_presentation_id = response.get("id")
+    print(f'A apresentação foi copiada, ID: {new_presentation_id}')
+    return new_presentation_id
 
 
 def create_copy_of_item_slide_original(slide_service, presentation_id: str, item_slide_original_id: str):
@@ -459,6 +421,7 @@ def create_copy_of_item_slide_original(slide_service, presentation_id: str, item
     }
     response = slide_service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute()
     new_item_slide_id = response["replies"][0]["duplicateObject"]["objectId"]
+    print(f'Criado uma cópia do slide original, ID: {new_item_slide_id}')
     return new_item_slide_id
 
 
@@ -476,6 +439,7 @@ def replace_text_globally(slide_service, presentation_id: str, old_text: str, ne
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
+    print(f'Texto alterado, de {old_text} para {new_text}')
 
 
 def replace_text_in_each_column_of_the_item_slide_copy(
@@ -531,6 +495,7 @@ def replace_text_in_each_column_of_the_item_slide_copy(
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
+    print(f'Adicionado texto na Coluna {index_range} do Slide id {slide_id}')
 
 
 def clear_unused_variables_globally(slide_service, presentation_id, items_per_slide):
@@ -567,6 +532,7 @@ def clear_unused_variables_globally(slide_service, presentation_id, items_per_sl
         slide_service.presentations().batchUpdate(
             presentationId=presentation_id, body=body
         ).execute()
+        print('Variáveis não usadas foram limpadas')
 
 
 def delete_slide(slide_service, presentation_id: str, slide_id: str):
@@ -582,6 +548,7 @@ def delete_slide(slide_service, presentation_id: str, slide_id: str):
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
+    print(f'Deletado slide original com id {slide_id}')
 
 
 if __name__ == "__main__":
