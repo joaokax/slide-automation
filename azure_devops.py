@@ -1,5 +1,6 @@
 from azure.devops.connection import Connection
 from azure.devops.v7_0.work.work_client import Client, WorkClient
+from azure.devops.v7_1.work import TeamContext
 from msrest.authentication import BasicAuthentication
 import pprint
 from dotenv import load_dotenv
@@ -60,7 +61,11 @@ def get_azure_work_items():
         if team.name == team_name:
             team_id = team.id
 
-    pprint.pprint(team_id)
+    team_context = TeamContext(project_id=project_id, team_id=team_id)
+    work_client = connection.clients.get_work_client()
+    iterations = work_client.get_team_iterations(team_context=team_context, timeframe="Current")
+    pprint.pprint(iterations)
+
 
     # iterations = work_client.get_team_iterations(team_context=team_name, timeframe="Current")
     # for iteration in iterations:
