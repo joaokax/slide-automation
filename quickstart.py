@@ -419,17 +419,20 @@ def main():
 
         item_slide_copy_id = ""
 
+        # Iteração em work items da sprint atual e da próxima
         for iteration_index, (items_list, initial_slide_id) in enumerate([
             (azure_object["work_items"], item_slide_original_id),
             (azure_object["next_sprint"], next_sprint_item_slide_id)
         ]):
             total_list_items = len(items_list)
             for index in range(total_list_items):
+                # Cria um novo slide a cada 3 work items
                 if index % items_per_slide == 0:
                     number_of_slides.append(index)
                     item_slide_copy_id = create_copy_of_item_slide_original(
                         slide_service, presentation_copy_id, initial_slide_id
                     )
+                # Altera os valores de uma coluna do slide por vez
                 replace_text_in_each_column_of_the_item_slide_copy(
                     slide_service, presentation_copy_id, item_slide_copy_id, index,
                     items_list[index]
@@ -438,7 +441,7 @@ def main():
         delete_slide(slide_service, presentation_copy_id, item_slide_original_id)
         delete_slide(slide_service, presentation_copy_id, next_sprint_item_slide_id)
         clear_unused_variables_globally(slide_service, presentation_copy_id, items_per_slide)
-        print(f"{len(number_of_slides)} slides copiados com sucesso.")
+        print(f"{len(number_of_slides)} slides criados com sucesso.")
 
     except HttpError as err:
         print(err)
@@ -531,7 +534,6 @@ def replace_text_in_each_column_of_the_item_slide_copy(
 
 
 def clear_unused_variables_globally(slide_service, presentation_id, items_per_slide):
-
     for index in range(items_per_slide):
         index_range: str = str(index + 1)
         body = {
