@@ -437,58 +437,8 @@ def main():
 
         delete_slide(slide_service, presentation_copy_id, item_slide_original_id)
         delete_slide(slide_service, presentation_copy_id, next_sprint_item_slide_id)
+        clear_unused_variables_globally(slide_service, presentation_copy_id, items_per_slide)
         print(f"{len(number_of_slides)} slides copiados com sucesso.")
-
-        # for index in range(work_items_total):
-        #
-        #     # Calculo que cria um novo slide a cada 3 work items, a partir do slide original
-        #     if index % items_per_slide == 0:
-        #         number_of_slides.append(index)
-        #
-        #         # Cria o novo slide e retorna seu próprio ID
-        #         item_slide_copy_id = create_copy_of_item_slide_original(
-        #             slide_service, presentation_copy_id, item_slide_original_id)
-        #
-        #         # Altera os textos em cada coluna desse slide que acabou de ser criado
-        #         replace_text_in_each_column_of_the_item_slide_copy(
-        #             slide_service, presentation_copy_id, item_slide_copy_id, index,
-        #             azure_object["work_items"][index]
-        #         )
-        #
-        #     # Colunas 2 e 3, 4 e 5, etc. Apenas alteram o texto mas não cria outro slide
-        #     else:
-        #         # for text, replacement in zip(texts_to_replace, replacement_texts):
-        #         replace_text_in_each_column_of_the_item_slide_copy(
-        #             slide_service, presentation_copy_id, item_slide_copy_id, index,
-        #             azure_object["work_items"][index]
-        #         )
-        #
-        # for index in range(next_sprint_work_items_total):
-        #
-        #     # Calculo que cria um novo slide a cada 3 work items, a partir do slide original
-        #     if index % items_per_slide == 0:
-        #         number_of_slides.append(index)
-        #
-        #         # Cria o novo slide e retorna seu próprio ID
-        #         item_slide_copy_id = create_copy_of_item_slide_original(
-        #             slide_service, presentation_copy_id, next_sprint_item_slide_id)
-        #
-        #         # Altera os textos em cada coluna desse slide que acabou de ser criado
-        #         replace_text_in_each_column_of_the_item_slide_copy(
-        #             slide_service, presentation_copy_id, item_slide_copy_id, index,
-        #             azure_object["next_sprint"][index]
-        #         )
-        #
-        #     # Colunas 2 e 3, 4 e 5, etc. Apenas alteram o texto mas não cria outro slide
-        #     else:
-        #         # for text, replacement in zip(texts_to_replace, replacement_texts):
-        #         replace_text_in_each_column_of_the_item_slide_copy(
-        #             slide_service, presentation_copy_id, item_slide_copy_id, index,
-        #             azure_object["next_sprint"][index]
-        #         )
-
-
-
 
     except HttpError as err:
         print(err)
@@ -578,6 +528,43 @@ def replace_text_in_each_column_of_the_item_slide_copy(
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
+
+
+def clear_unused_variables_globally(slide_service, presentation_id, items_per_slide):
+
+    for index in range(items_per_slide):
+        index_range: str = str(index + 1)
+        body = {
+            "requests": [
+                {
+                    "replaceAllText": {
+                        "containsText": {"text": "{{type_" + index_range + "}}"},
+                        "replaceText": ""
+                    }
+                },
+                {
+                    "replaceAllText": {
+                        "containsText": {"text": "{{id_" + index_range + "}}"},
+                        "replaceText": ""
+                    }
+                },
+                {
+                    "replaceAllText": {
+                        "containsText": {"text": "{{title_" + index_range + "}}"},
+                        "replaceText": ""
+                    }
+                },
+                {
+                    "replaceAllText": {
+                        "containsText": {"text": "{{task_" + index_range + "}}"},
+                        "replaceText": ""
+                    }
+                }
+            ]
+        }
+        slide_service.presentations().batchUpdate(
+            presentationId=presentation_id, body=body
+        ).execute()
 
 
 def delete_slide(slide_service, presentation_id: str, slide_id: str):
