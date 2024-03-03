@@ -402,40 +402,121 @@ def main():
         # TODO CRIAR A QUANTIDADE DE SLIDES EXATA PARA COMPORTAR O NÚMERO DE WORK ITEMS
         copied_presentation_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
         copied_presentation = slide_service.presentations().get(presentationId=copied_presentation_id).execute()
-        slide_index = 2
+        slide_items_index = 2
+        item_slide_original_id = copied_presentation.get('slides')[slide_items_index]['objectId']
         items_per_slide = 3
         work_items_total = len(azure_object["work_items"])
         number_of_slides = []
+        presentation_copy_id = "1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0"
+        texts_to_replace = ["{{type_1}}", "{{id_1}}", "{{title_1}}"]
+        replacement_texts = ["PB1", "123456", "Um titulo qualquer"]
         # Cálculo para criar um novo slide a cada 3 PBIs (work items)
-        for i in range(work_items_total):
-            if i % items_per_slide == 0 and i >= items_per_slide:
-                number_of_slides.append(i)
-                # print(i)
-                body = {
-                    'requests': [
-                        {
-                            'duplicateObject': {
-                                'objectId': copied_presentation.get('slides')[slide_index]['objectId'],
-                            }
-                        }
-                    ]
-                }
-                slide_service.presentations().batchUpdate(presentationId=copied_presentation_id, body=body).execute()
+
+        # Cria uma cópia do slide original de work items
+        item_slide_copy_id = create_copy_of_item_slide_original(
+            slide_service, copied_presentation_id, item_slide_original_id)
+
+        for index in range(work_items_total):
+
+            # Calculo que cria um novo slide a cada 3 work items, a partir do slide original 
+            if index % items_per_slide == 0 and index >= items_per_slide:
+                number_of_slides.append(index)
+
+                # Cria o novo slide e retorna seu próprio ID
+                item_slide_copy_id = create_copy_of_item_slide_original(
+                    slide_service, copied_presentation_id, item_slide_original_id)
+
+                # Altera os textos em cada coluna desse slide que acabou de ser criado
+                replace_text_in_each_column_of_the_item_slide_copy(
+                    slide_service, presentation_copy_id, item_slide_copy_id, index,
+                    azure_object["work_items"][index]
+                )
+
+            # Os 3 primeiros itens
+            else:
+                # for text, replacement in zip(texts_to_replace, replacement_texts):
+                replace_text_in_each_column_of_the_item_slide_copy(
+                    slide_service, presentation_copy_id, item_slide_copy_id, index,
+                    azure_object["work_items"][index]
+                )
 
         print(f"{len(number_of_slides)} slides copiados com sucesso.")
 
+        # TODO TEM QUE TER UM SLIDE BASE, COPIAR ELE, MUDAR OS VALORES DESSA CÓPIA E OS PRÓXIMOS PEGAR O SLIDE BASE E NÃO O QUE FOI MODIFICADO
+
         # TODO Preencher os slides com as informações do objeto azure_object
-
-
-
-
-
-
-
-
 
     except HttpError as err:
         print(err)
+
+
+def create_copy_of_item_slide_original(slide_service, presentation_id: str, item_slide_original_id: str):
+    body = {
+        'requests': [
+            {
+                'duplicateObject': {
+                    'objectId': item_slide_original_id
+                }
+            }
+        ]
+    }
+    response = slide_service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute()
+    new_item_slide_id = response["replies"][0]["duplicateObject"]["objectId"]
+    return new_item_slide_id
+
+
+def replace_text_in_each_column_of_the_item_slide_copy(
+        slide_service, presentation_id: str, slide_id: int, index: int, azure_work_items):
+
+    tasks_text = ""
+    for task in azure_work_items["tasks"]:
+        tasks_text += f"{task['task_title']}\n"
+
+    index_range: str = str(1 + (index % 3))
+
+    body = {
+        "requests": [
+            {
+                "replaceAllText": {
+                    "containsText": {"text": "{{type_" + index_range + "}}"},
+                    "replaceText": azure_work_items["type"],
+                    "pageObjectIds": [
+                        slide_id
+                    ]
+                }
+            },
+            {
+                "replaceAllText": {
+                    "containsText": {"text": "{{id_" + index_range + "}}"},
+                    "replaceText": str(azure_work_items["id"]),
+                    "pageObjectIds": [
+                        slide_id
+                    ]
+                }
+            },
+            {
+                "replaceAllText": {
+                    "containsText": {"text": "{{title_" + index_range + "}}"},
+                    "replaceText": azure_work_items["title"],
+                    "pageObjectIds": [
+                        slide_id
+                    ]
+                }
+            },
+            {
+                "replaceAllText": {
+                    "containsText": {"text": "{{task_" + index_range + "}}"},
+                    "replaceText": tasks_text,
+                    "pageObjectIds": [
+                        slide_id
+                    ]
+                }
+            }
+        ]
+    }
+    slide_service.presentations().batchUpdate(
+        presentationId=presentation_id, body=body
+    ).execute()
 
 
 if __name__ == "__main__":
