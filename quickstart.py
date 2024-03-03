@@ -384,47 +384,41 @@ def main():
         # print("Os textos foram substituidos com sucesso!")
 
         # TODO CLONAR SLIDES DA APRESENTAÇÃO CLONE
-        # copied_presentation_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
-        # copied_presentation = slide_service.presentations().get(presentationId=copied_presentation_id).execute()
+        # presentation_copy_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
+        # copied_presentation = slide_service.presentations().get(presentationId=presentation_copy_id).execute()
         # slide_indices = [2, 4]
         # requests = []
         # for index in slide_indices:
         #     requests.append({
         #         'duplicateObject': {
-        #             'objectId': copied_presentation.get('slides')[index]['objectId'],
+        #             'objectId': presentation_copy.get('slides')[index]['objectId'],
         #         }
         #     })
         #
         # body = {'requests': requests}
-        # slide_service.presentations().batchUpdate(presentationId=copied_presentation_id, body=body).execute()
+        # slide_service.presentations().batchUpdate(presentationId=presentation_copy_id, body=body).execute()
         # print("Slide 3 e 5 foram copiados com sucesso.")
 
         # TODO CRIAR A QUANTIDADE DE SLIDES EXATA PARA COMPORTAR O NÚMERO DE WORK ITEMS
-        copied_presentation_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
-        copied_presentation = slide_service.presentations().get(presentationId=copied_presentation_id).execute()
+        presentation_copy_id = '1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0'
+        presentation_copy = slide_service.presentations().get(presentationId=presentation_copy_id).execute()
         slide_items_index = 2
-        item_slide_original_id = copied_presentation.get('slides')[slide_items_index]['objectId']
+        item_slide_original_id = presentation_copy.get('slides')[slide_items_index]['objectId']
         items_per_slide = 3
         work_items_total = len(azure_object["work_items"])
         number_of_slides = []
         presentation_copy_id = "1qdnAr293rt7cKSO7gUBMnQVUXOVM6lcDHEPQTYQuwB0"
-        texts_to_replace = ["{{type_1}}", "{{id_1}}", "{{title_1}}"]
-        replacement_texts = ["PB1", "123456", "Um titulo qualquer"]
-        # Cálculo para criar um novo slide a cada 3 PBIs (work items)
 
-        # Cria uma cópia do slide original de work items
-        item_slide_copy_id = create_copy_of_item_slide_original(
-            slide_service, copied_presentation_id, item_slide_original_id)
-
+        item_slide_copy_id = ""
         for index in range(work_items_total):
 
             # Calculo que cria um novo slide a cada 3 work items, a partir do slide original 
-            if index % items_per_slide == 0 and index >= items_per_slide:
+            if index % items_per_slide == 0:
                 number_of_slides.append(index)
 
                 # Cria o novo slide e retorna seu próprio ID
                 item_slide_copy_id = create_copy_of_item_slide_original(
-                    slide_service, copied_presentation_id, item_slide_original_id)
+                    slide_service, presentation_copy_id, item_slide_original_id)
 
                 # Altera os textos em cada coluna desse slide que acabou de ser criado
                 replace_text_in_each_column_of_the_item_slide_copy(
@@ -432,7 +426,7 @@ def main():
                     azure_object["work_items"][index]
                 )
 
-            # Os 3 primeiros itens
+            # Colunas 2 e 3, 4 e 5, etc. Apenas alteram o texto mas não cria outro slide
             else:
                 # for text, replacement in zip(texts_to_replace, replacement_texts):
                 replace_text_in_each_column_of_the_item_slide_copy(
@@ -440,11 +434,9 @@ def main():
                     azure_object["work_items"][index]
                 )
 
+        delete_item_slide_original(slide_service, presentation_copy_id, item_slide_original_id)
         print(f"{len(number_of_slides)} slides copiados com sucesso.")
 
-        # TODO TEM QUE TER UM SLIDE BASE, COPIAR ELE, MUDAR OS VALORES DESSA CÓPIA E OS PRÓXIMOS PEGAR O SLIDE BASE E NÃO O QUE FOI MODIFICADO
-
-        # TODO Preencher os slides com as informações do objeto azure_object
 
     except HttpError as err:
         print(err)
@@ -472,6 +464,7 @@ def replace_text_in_each_column_of_the_item_slide_copy(
     for task in azure_work_items["tasks"]:
         tasks_text += f"{task['task_title']}\n"
 
+    # Intervado de 1 a 3 sempre
     index_range: str = str(1 + (index % 3))
 
     body = {
@@ -510,6 +503,21 @@ def replace_text_in_each_column_of_the_item_slide_copy(
                     "pageObjectIds": [
                         slide_id
                     ]
+                }
+            }
+        ]
+    }
+    slide_service.presentations().batchUpdate(
+        presentationId=presentation_id, body=body
+    ).execute()
+
+
+def delete_item_slide_original(slide_service, presentation_id, slide_id):
+    body = {
+        "requests": [
+            {
+                "deleteObject": {
+                    "objectId": slide_id
                 }
             }
         ]
