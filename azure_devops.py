@@ -1,15 +1,10 @@
-import re
-
 from azure.devops.connection import Connection
-from azure.devops.v7_0.work.work_client import Client, WorkClient
 from azure.devops.v7_1.work import TeamContext
 from azure.devops.v7_1.work_item_tracking import Wiql, WorkItemTrackingClient
 from msrest.authentication import BasicAuthentication
-import pprint
 from dotenv import load_dotenv
 import os
-import json
-import requests
+import re
 
 load_dotenv()
 
@@ -32,8 +27,7 @@ def get_azure_work_items():
     azure_object = get_azure_object(organization_url, credentials, project_name, current_sprint_path,
                                     current_sprint_number)
 
-    json_data = json.dumps(azure_object, indent=4)
-    print(json_data)
+    return azure_object
 
 
 def get_project_id(core_client):
