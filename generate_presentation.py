@@ -142,7 +142,6 @@ def replace_text_globally(slide_service, presentation_id: str, old_text: str, ne
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
-    print(f'-- Texto alterado, de {old_text} para {new_text}')
     print(emoji.emojize(f"  :check_mark_button: Texto alterado de '{old_text}' para '{new_text}'"))
 
 
