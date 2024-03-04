@@ -107,9 +107,11 @@ def process_work_items_for_sprint(
         for item in work_item_list.work_items:
             # Requisição para trazer mais informações sobre o work item
             work_item = work_item_tracking_client.get_work_item(id=item.id)
+            work_item_type = work_item.fields['System.WorkItemType']
+            work_item_type = "PBI" if work_item_type == "Product Backlog Item" else work_item_type
             work_item_dict = {
                 "id": work_item.id,
-                "type": work_item.fields['System.WorkItemType'],
+                "type": work_item_type,
                 "state": work_item.fields['System.State'],
                 "title": work_item.fields['System.Title'],
                 "tasks": []

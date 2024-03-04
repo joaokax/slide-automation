@@ -147,9 +147,14 @@ def replace_text_globally(slide_service, presentation_id: str, old_text: str, ne
 
 def replace_text_in_each_column_of_the_item_slide_copy(
         slide_service, presentation_id: str, slide_id: int, index: int, azure_work_items):
+    # tasks_text = ""
+    # for task in azure_work_items["tasks"]:
+    #     tasks_text += f"{task['task_title']}\n"
     tasks_text = ""
-    for task in azure_work_items["tasks"]:
-        tasks_text += f"{task['task_title']}\n"
+    for i, task in enumerate(azure_work_items["tasks"]):
+        tasks_text += f"{task['task_title']}"
+        if i < len(azure_work_items["tasks"]) - 1:  # Verifique se não é o último item
+            tasks_text += "\n"
 
     # Intervado de 1 a 3 sempre
     index_range: str = str(1 + (index % 3))
