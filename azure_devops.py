@@ -32,7 +32,8 @@ def get_azure_work_items():
     azure_object = get_azure_object(organization_url, credentials, project_name, current_sprint_path,
                                     current_sprint_number)
 
-    print(azure_object)
+    json_data = json.dumps(azure_object, indent=4)
+    print(json_data)
 
 
 def get_project_id(core_client):
@@ -60,6 +61,7 @@ def get_current_sprint(connection, project_id, team_id):
     team_context = TeamContext(project_id=project_id, team_id=team_id)
     current_sprint = work_client.get_team_iterations(team_context=team_context, timeframe="Current")
     current_sprint_path = current_sprint[0].path
+    current_sprint_path = current_sprint_path.replace('\\', '\\\\')
     current_sprint_number = re.findall(r"\d+", current_sprint[0].name)[0]
     return current_sprint_path, current_sprint_number
 
@@ -97,7 +99,7 @@ def process_work_items_for_sprint(
                                  f"FROM WorkItems "
                                  f"WHERE [System.WorkItemType] IN ('Product Backlog Item', 'Bug') "
                                  f"AND [System.State] {state_condition} "
-                                 f"AND [System.IterationPath] = {current_sprint_path}")
+                                 f"AND [System.IterationPath] = '{current_sprint_path}'")
 
     work_item_tracking_client = WorkItemTrackingClient(organization_url, credentials)
     work_item_list = work_item_tracking_client.query_by_wiql(work_item_query)
@@ -121,7 +123,7 @@ def process_work_items_for_sprint(
                                     f"WHERE [System.WorkItemType] IN ('Task', 'Impediment') "
                                     f"AND [System.State] {state_condition_task} "
                                     f"AND [System.Parent] = {work_item.id} "
-                                    f"AND [System.IterationPath] = {current_sprint_path}")
+                                    f"AND [System.IterationPath] = '{current_sprint_path}'")
             task_list = work_item_tracking_client.query_by_wiql(wiql=task_query)
 
             if task_list.work_items is not None:
@@ -133,7 +135,7 @@ def process_work_items_for_sprint(
                         "task_id": task.id,
                         "task_type": task.fields['System.WorkItemType'],
                         "task_state": task.fields['System.State'],
-                        "task_title": task.task_title
+                        "task_title": task.fields['System.Title']
                     }
                     work_item_dict["tasks"].append(task_dict)
 
