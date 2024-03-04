@@ -1,3 +1,4 @@
+import emoji
 from azure.devops.connection import Connection
 from azure.devops.v7_1.work import TeamContext
 from azure.devops.v7_1.work_item_tracking import Wiql, WorkItemTrackingClient
@@ -37,6 +38,7 @@ def get_project_id(core_client):
     for project in get_projects_response:
         if project.name == project_name:
             project_id = project.id
+            print(emoji.emojize("  :check_mark_button: Nome do projeto"))
     return project_id
 
 
@@ -47,6 +49,7 @@ def get_team_id(core_client, project_id):
     for team in get_teams_response:
         if team.name == team_name:
             team_id = team.id
+            print(emoji.emojize("  :check_mark_button: Informações da equipe"))
     return team_id
 
 
@@ -57,6 +60,7 @@ def get_current_sprint(connection, project_id, team_id):
     current_sprint_path = current_sprint[0].path
     current_sprint_path = current_sprint_path.replace('\\', '\\\\')
     current_sprint_number = re.findall(r"\d+", current_sprint[0].name)[0]
+    print(emoji.emojize("  :check_mark_button: Dados da sprint atual"))
     return current_sprint_path, current_sprint_number
 
 
@@ -68,11 +72,11 @@ def get_azure_object(organization_url, credentials, project_name, current_sprint
         "next_sprint": []
     }
 
-    # Consulta e processa work items para a sprint atual
+    print(emoji.emojize(":blue_circle: Obtendo work items da sprint atual"))
     process_work_items_for_sprint(
         organization_url, credentials, current_sprint_path, azure_object['work_items'], is_current_sprint=True)
 
-    # Consulta e processa work items para a próxima sprint
+    print(emoji.emojize(":blue_circle: Obtendo work items da próxima sprint"))
     process_work_items_for_sprint(
         organization_url, credentials, current_sprint_path, azure_object['next_sprint'])
 

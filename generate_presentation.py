@@ -36,7 +36,7 @@ def main():
         slide_service = build("slides", "v1", credentials=creds)
         drive_service = build("drive", "v3", credentials=creds)
 
-        print(emoji.emojize(":blue_circle: Obtendo informações do Azure Devops"))
+        print(emoji.emojize(":blue_circle: Obtendo informações no Azure Devops"))
         azure_object = get_azure_work_items()
 
         print(emoji.emojize(":blue_circle: Criando a apresentação no Google Drive"))
@@ -197,7 +197,7 @@ def replace_text_in_each_column_of_the_item_slide_copy(
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
-    print(emoji.emojize(f"  :check_mark_button: Texto adicionado na Coluna {index_range} do Slide id {slide_id}"))
+    print(emoji.emojize(f"      :check_mark_button: Texto adicionado na Coluna {index_range} do Slide id {slide_id}"))
 
 
 def clear_unused_variables_globally(slide_service, presentation_id, items_per_slide):
@@ -234,7 +234,6 @@ def clear_unused_variables_globally(slide_service, presentation_id, items_per_sl
         slide_service.presentations().batchUpdate(
             presentationId=presentation_id, body=body
         ).execute()
-        print(emoji.emojize("  :check_mark_button: Tudo limpo"))
 
 
 def delete_slide(slide_service, presentation_id: str, slide_id: str):
