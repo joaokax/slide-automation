@@ -1,10 +1,9 @@
-import json
 import os.path
-
+import emoji
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow, Flow
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
@@ -14,9 +13,6 @@ load_dotenv()
 
 SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly', 'https://www.googleapis.com/auth/presentations',
           'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.file']
-
-
-# DRIVE_FOLDER_ID = os.getenv("DRIVE_FOLDER_ID")
 
 
 def main():
@@ -35,19 +31,19 @@ def main():
             token.write(creds.to_json())
 
     try:
-        print("Autenticado. Começando o processo...")
+        print(emoji.emojize(":green_circle: Autenticado. Começando o processo..."))
         slide_template_id = os.getenv("SLIDE_TEMPLATE_ID")
         slide_service = build("slides", "v1", credentials=creds)
         drive_service = build("drive", "v3", credentials=creds)
 
-        print("Obtendo informações do Azure Devops")
+        print(emoji.emojize(":blue_circle: Obtendo informações do Azure Devops"))
         azure_object = get_azure_work_items()
 
-        print("Criando a apresentação no Google Drive")
+        print(emoji.emojize(":blue_circle: Criando a apresentação no Google Drive"))
         presentation_copy_id = create_copy_of_presentation(drive_service, slide_template_id, azure_object)
         next_sprint_number = int(azure_object["sprint"]) + 1
 
-        print("Alterando textos globalmente")
+        print(emoji.emojize(":blue_circle: Alterando textos globalmente"))
         replace_text_globally(slide_service, presentation_copy_id, "{{sprint}}", azure_object["sprint"])
         replace_text_globally(slide_service, presentation_copy_id, "{{next_s}}", str(next_sprint_number))
 
@@ -60,20 +56,20 @@ def main():
         next_sprint_item_slide_id = presentation_copy.get('slides')[next_sprint_item_slide]['objectId']
         items_per_slide = 3
 
-        print("Gerando slides com work items")
+        print(emoji.emojize(":blue_circle: Gerando slides com work items"))
         generate_slides_with_work_items(
             slide_service, presentation_copy_id, items_per_slide, azure_object, item_slide_original_id,
             next_sprint_item_slide_id
         )
 
-        print("Deletando slides de referência")
+        print(emoji.emojize(":fire: Deletando slides de referência"))
         delete_slide(slide_service, presentation_copy_id, item_slide_original_id)
         delete_slide(slide_service, presentation_copy_id, next_sprint_item_slide_id)
 
-        print("Limpando variáveis não usadas")
+        print(emoji.emojize(":fire: Limpando variáveis não usadas"))
         clear_unused_variables_globally(slide_service, presentation_copy_id, items_per_slide)
 
-        print("Apresentação foi gerada com sucesso!")
+        print(emoji.emojize(":thumbs_up: Apresentação foi gerada com sucesso!"))
 
     except HttpError as err:
         print(err)
@@ -82,7 +78,6 @@ def main():
 def generate_slides_with_work_items(
         slide_service, presentation_copy_id: str, items_per_slide: int, azure_object, item_slide_original_id: str,
         next_sprint_item_slide_id: str):
-
     number_of_slides_created = []
     item_slide_copy_id = ""
 
@@ -104,7 +99,7 @@ def generate_slides_with_work_items(
                 slide_service, presentation_copy_id, item_slide_copy_id, index,
                 items_list[index]
             )
-    print(f"-- {len(number_of_slides_created)} slides criados com sucesso.")
+    print(emoji.emojize(f"  :check_mark_button: {len(number_of_slides_created)} slides criados com sucesso."))
 
 
 def create_copy_of_presentation(drive_service, slide_template_id: str, azure_object):
@@ -113,7 +108,7 @@ def create_copy_of_presentation(drive_service, slide_template_id: str, azure_obj
     }
     response = drive_service.files().copy(fileId=slide_template_id, body=body).execute()
     new_presentation_id = response.get("id")
-    print(f'-- A apresentação foi criada, ID: {new_presentation_id}')
+    print(emoji.emojize(f"  :check_mark_button: Apresentação criada com id {new_presentation_id}"))
     return new_presentation_id
 
 
@@ -129,7 +124,7 @@ def create_copy_of_item_slide_original(slide_service, presentation_id: str, item
     }
     response = slide_service.presentations().batchUpdate(presentationId=presentation_id, body=body).execute()
     new_item_slide_id = response["replies"][0]["duplicateObject"]["objectId"]
-    print(f'-- Criado uma cópia do slide original com id {new_item_slide_id}')
+    print(emoji.emojize(f"  :check_mark_button: Criado uma cópia do slide original com id {new_item_slide_id}"))
     return new_item_slide_id
 
 
@@ -148,11 +143,11 @@ def replace_text_globally(slide_service, presentation_id: str, old_text: str, ne
         presentationId=presentation_id, body=body
     ).execute()
     print(f'-- Texto alterado, de {old_text} para {new_text}')
+    print(emoji.emojize(f"  :check_mark_button: Texto alterado de '{old_text}' para '{new_text}'"))
 
 
 def replace_text_in_each_column_of_the_item_slide_copy(
         slide_service, presentation_id: str, slide_id: int, index: int, azure_work_items):
-
     tasks_text = ""
     for task in azure_work_items["tasks"]:
         tasks_text += f"{task['task_title']}\n"
@@ -203,7 +198,7 @@ def replace_text_in_each_column_of_the_item_slide_copy(
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
-    print(f'-- Adicionado texto na Coluna {index_range} do Slide id {slide_id}')
+    print(emoji.emojize(f"  :check_mark_button: Texto adicionado na Coluna {index_range} do Slide id {slide_id}"))
 
 
 def clear_unused_variables_globally(slide_service, presentation_id, items_per_slide):
@@ -240,7 +235,7 @@ def clear_unused_variables_globally(slide_service, presentation_id, items_per_sl
         slide_service.presentations().batchUpdate(
             presentationId=presentation_id, body=body
         ).execute()
-        print('-- Limpado')
+        print(emoji.emojize("  :check_mark_button: Tudo limpo"))
 
 
 def delete_slide(slide_service, presentation_id: str, slide_id: str):
@@ -256,7 +251,7 @@ def delete_slide(slide_service, presentation_id: str, slide_id: str):
     slide_service.presentations().batchUpdate(
         presentationId=presentation_id, body=body
     ).execute()
-    print(f'-- Deletado slide original com id {slide_id}')
+    print(emoji.emojize(f"  :check_mark_button: Slide deletado com id {slide_id}"))
 
 
 if __name__ == "__main__":
