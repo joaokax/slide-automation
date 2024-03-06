@@ -103,8 +103,9 @@ def generate_slides_with_work_items(
 
 
 def create_copy_of_presentation(drive_service, slide_template_id: str, azure_object):
+    project_name = os.getenv("PROJECT_NAME")
     body = {
-        "name": f"Mercado Topográfico - Sprint {azure_object['sprint']}"
+        "name": f"{project_name} - Sprint {azure_object['sprint']}"
     }
     response = drive_service.files().copy(fileId=slide_template_id, body=body).execute()
     new_presentation_id = response.get("id")
@@ -147,13 +148,11 @@ def replace_text_globally(slide_service, presentation_id: str, old_text: str, ne
 
 def replace_text_in_each_column_of_the_item_slide_copy(
         slide_service, presentation_id: str, slide_id: int, index: int, azure_work_items):
-    # tasks_text = ""
-    # for task in azure_work_items["tasks"]:
-    #     tasks_text += f"{task['task_title']}\n"
+
     tasks_text = ""
     for i, task in enumerate(azure_work_items["tasks"]):
         tasks_text += f"{task['task_title']}"
-        if i < len(azure_work_items["tasks"]) - 1:  # Verifique se não é o último item
+        if i < len(azure_work_items["tasks"]) - 1:
             tasks_text += "\n"
 
     # Intervado de 1 a 3 sempre
