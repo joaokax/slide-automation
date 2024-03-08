@@ -70,6 +70,9 @@ def main():
         clear_unused_variables_globally(slide_service, presentation_copy_id, items_per_slide)
 
         print(emoji.emojize(":thumbs_up: Apresentação foi gerada com sucesso!"))
+        
+        presentation_url = f"https://docs.google.com/presentation/d/{presentation_copy_id}"
+        return presentation_url
 
     except HttpError as err:
         print(err)

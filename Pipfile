@@ -38,6 +38,7 @@ typing-extensions = "==4.10.0"
 uritemplate = "==4.1.1"
 urllib3 = "==2.2.1"
 virtualenv = "==20.25.1"
+"discord.py" = "*"
 
 [dev-packages]
 
