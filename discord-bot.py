@@ -18,7 +18,5 @@ async def presentation(contex):
     presentation_url = generate_presentation.main()
     await contex.send(contex.author.mention + " aqui está a apresentação da sprint review: " + str(presentation_url))
 
-# TODO Se gerar uma apresentação da sprint e ela já existir, deve-se apagar a versão anterior e deixar a mais recente
-
 bot.run(discord_bot_token)
 
