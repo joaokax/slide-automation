@@ -4,4 +4,4 @@ COPY .env credentials.json token.json ./
 COPY Pipfile Pipfile.lock ./
 RUN pip install pipenv && pipenv install --deploy --system
 COPY . .
-CMD ["python3", "discord-bot.py"]
+CMD ["python", "discord-bot.py"]
